@@ -1,0 +1,146 @@
+# File: momentum.kv
+
+<MomentumLayout>:
+    task_list: task_list_id
+    task_name_input: task_name_input_id
+    task_duration_input: task_duration_input_id
+
+    orientation: 'vertical'
+    spacing: 10
+    padding: 10
+
+    BoxLayout:
+        size_hint_y: None
+        height: '40dp'
+        spacing: 10
+
+        TextInput:
+            id: task_name_input_id
+            hint_text: 'Enter Task Name'
+            multiline: False
+
+        TextInput:
+            id: task_duration_input_id
+            hint_text: 'Duration (mins)'
+            multiline: False
+            input_filter: 'int'
+            size_hint_x: 0.4
+
+        Button:
+            text: 'Add Task'
+            size_hint_x: 0.4
+            on_press: root.add_task()
+
+    Label:
+        text: root.timer_text
+        font_size: '60sp'
+        size_hint_y: None
+        height: '80dp'
+    
+    BoxLayout:
+        size_hint_y: None
+        height: '50dp'
+        spacing: 10
+
+        Button:
+            text: 'Play'
+            on_press: root.start_timer()
+        
+        Button:
+            text: 'Pause'
+            on_press: root.pause_timer()
+
+        Button:
+            text: 'Reset'
+            on_press: root.reset_timer()
+    
+    # --- NEW: Widget for the visual progress bar ---
+    Widget:
+        size_hint_y: None
+        height: '10dp'
+        canvas:
+            # Background of the bar (dark grey)
+            Color:
+                rgba: 0.3, 0.3, 0.3, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+            # The actual progress (blue)
+            # Its width is self.width * root.progress_fraction
+            Color:
+                rgba: 0.2, 0.6, 0.8, 1
+            Rectangle:
+                pos: self.pos
+                size: (self.width * root.progress_fraction, self.height)
+
+    ScrollView:
+        BoxLayout:
+            id: task_list_id
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+
+# --- ADD THIS NEW CODE TO THE BOTTOM OF momentum.kv ---
+
+<EditPopup>:
+    size_hint: 0.8, 0.5
+    auto_dismiss: False
+    title: "Edit Task"
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '10dp'
+        spacing: '10dp'
+
+        Label:
+            text: "Edit Task Name:"
+        TextInput:
+            id: task_name_input
+            text: root.task_data.get('name', '') if root.task_data else ''
+            multiline: False
+        
+        Label:
+            text: "Edit Duration (mins):"
+        TextInput:
+            id: task_duration_input
+            text: str(root.task_data.get('duration', 0) // 60) if root.task_data else '0'
+            multiline: False
+            input_filter: 'int'
+        
+        BoxLayout:
+            size_hint_y: None
+            height: '40dp'
+            spacing: '10dp'
+
+            Button:
+                text: "Save"
+                on_press: root.save_changes()
+            Button:
+                text: "Cancel"
+                on_press: root.dismiss()
+
+<DeletePopup>:
+    size_hint: 0.8, 0.4
+    auto_dismiss: False
+    title: "Confirm Deletion"
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '10dp'
+        spacing: '10dp'
+
+        Label:
+            text: "Are you sure you want to delete this task?"
+        
+        BoxLayout:
+            size_hint_y: None
+            height: '40dp'
+            spacing: '10dp'
+
+            Button:
+                text: "Yes, Delete"
+                on_press: root.confirm_delete()
+            Button:
+                text: "Cancel"
+                on_press: root.dismiss()
